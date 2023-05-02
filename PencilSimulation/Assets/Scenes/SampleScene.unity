@@ -339,6 +339,7 @@ MonoBehaviour:
   ix: 0
   iy: 0
   iz: 0
+  hasSpawned: 0
 --- !u!4 &1029569118
 Transform:
   m_ObjectHideFlags: 0
@@ -398,8 +399,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0235025d98aec924191fdb27b50b8c7f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  player: {fileID: 1657710246}
-  velocity: 1
+  player: {fileID: 0}
+  pencil: {fileID: 0}
+  spawner: {fileID: 1029569117}
+  v_x: 0
+  v_z: 0
+  v_y: 0
 --- !u!1 &1657710246
 GameObject:
   m_ObjectHideFlags: 0
