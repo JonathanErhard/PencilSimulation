@@ -2,10 +2,12 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class LQR2D : MonoBehaviour
+public class JankLQR2D : MonoBehaviour
 {
-    [SerializeField] private Filter2D filter;
-    [SerializeField] private float[] rlamda_R = { 1f, 1f ,0.1f,0.01f}; //Reziprok der Eigenwerte von R (Aussage, welche Elemente des Statevectors wichtiger sind
+    float R2PI = 0.00555555555f; // 1/180
+    [SerializeField] private float t = 0.5f;
+    [SerializeField] private float z, theta;
+    [SerializeField] private float[] rlamda_R = { 1f, 1f, 0.1f, 0.01f }; //Reziprok der Eigenwerte von R (Aussage, welche Elemente des Statevectors wichtiger sind
     [SerializeField] private float p = 1; //Aussage, wie agressiv gesteuert werden darf
     [SerializeField] private float[] B; //Wie geht unser controller in den statevector ein
     [SerializeField] private Rigidbody rbStift; //rb des Stifts (wird für x[] nicht verwendet, weil es irl auch nicht so wäre
@@ -15,14 +17,15 @@ public class LQR2D : MonoBehaviour
     [SerializeField] private float[] x;
     void Start()
     {
-        filter = GameObject.Find("Filter").GetComponent<Filter2D>();
         rbStift = GameObject.Find("pencil Variant(Clone)").GetComponent<Rigidbody>();
         rbCube = GameObject.Find("Cube").GetComponent<Rigidbody>();
-        B = new float[] { 0, 1, 0, 1 /rbStift.position.y};
+        B = new float[] { 0, 1, 0, 1 / rbStift.centerOfMass.y };
         k = new float[4];
         x = new float[4];
+        Debug.Log(B[3]);
+        x[2] = rbStift.rotation.eulerAngles.z*R2PI;
+        x[0] = rbCube.position.x;
     }
-
     private float[] naivCrossProduct(float[] v1, float[] v2)
     {
         //if(v1.Length != v2.Length)
@@ -33,7 +36,7 @@ public class LQR2D : MonoBehaviour
         return ret;
     }
 
-    private float dotProduct(float[] v1,float[] v2)
+    private float dotProduct(float[] v1, float[] v2)
     {
         float[] products = naivCrossProduct(v1, v2);
         float ret = 0;
@@ -43,22 +46,35 @@ public class LQR2D : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        k = naivCrossProduct(rlamda_R, B);
-        setX();
-        a = -dotProduct(k, x);
-        publish(a);
+        if (t > 0)
+        {
+            t -= Time.deltaTime;
+            setX();
+        }
+        else
+        {
+            k = naivCrossProduct(rlamda_R, B);
+            setX();
+            a = -dotProduct(k, x);
+            publish(a);
+        }
     }
 
     private void publish(float a)
     {
-        rbCube.velocity += new Vector3(0,0,a)*Time.deltaTime;
+        rbCube.velocity += new Vector3(a*Time.deltaTime, 0, 0);
     }
 
     private void setX()
     {
-        x[0] = filter.getZ();
-        x[1] = filter.getD_z();
-        x[2] = filter.getPhi();
-        x[3] = filter.getD_phi();
+
+        x[3] = rbStift.angularVelocity.z * R2PI;
+        x[2] = rbStift.rotation.eulerAngles.z * R2PI;
+        x[1] = (z - rbCube.position.x) / Time.deltaTime;
+        x[0] = rbCube.position.x;
+        /*x[3] = (theta - rbStift.rotation.eulerAngles.z)*R2PI / Time.deltaTime;
+        x[2] = rbStift.rotation.eulerAngles.z*R2PI;
+        x[1] = (z - rbCube.position.x)/Time.deltaTime;
+        x[0] = rbCube.position.x;*/
     }
 }
