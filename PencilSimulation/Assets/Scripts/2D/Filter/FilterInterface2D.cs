@@ -1,7 +1,7 @@
 using System.Collections;
 using UnityEngine;
 
-public interface Filter2D
+public interface FilterInterface2D
 {
     public float getPhi();
     public float getD_phi();

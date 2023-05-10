@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class LQR2D : MonoBehaviour
 {
-    [SerializeField] private Filter2D filter;
+    [SerializeField] private FilterInterface2D filter;
     [SerializeField] private float[] rlamda_R = { 1f, 1f ,0.1f,0.01f}; //Reziprok der Eigenwerte von R (Aussage, welche Elemente des Statevectors wichtiger sind
     [SerializeField] private float p = 1; //Aussage, wie agressiv gesteuert werden darf
     [SerializeField] private float[] B; //Wie geht unser controller in den statevector ein
@@ -15,7 +15,7 @@ public class LQR2D : MonoBehaviour
     [SerializeField] private float[] x;
     void Start()
     {
-        filter = GameObject.Find("Filter").GetComponent<Filter2D>();
+        filter = GameObject.Find("Filter").GetComponent<FilterInterface2D>();
         rbStift = GameObject.Find("pencil Variant(Clone)").GetComponent<Rigidbody>();
         rbCube = GameObject.Find("Cube").GetComponent<Rigidbody>();
         B = new float[] { 0, 1, 0, 1 /rbStift.position.y};

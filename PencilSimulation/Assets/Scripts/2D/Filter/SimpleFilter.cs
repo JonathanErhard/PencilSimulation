@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class SimpleFilter : MonoBehaviour,Filter2D
+public class SimpleFilter : MonoBehaviour,FilterInterface2D
 {
     private float phi,d_phi,z,d_z;
     Rigidbody rb;

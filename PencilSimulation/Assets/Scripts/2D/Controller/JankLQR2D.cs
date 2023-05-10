@@ -4,11 +4,11 @@ using UnityEngine;
 
 public class JankLQR2D : MonoBehaviour
 {
-    float R2PI = 0.00555555555f; // 1/180
+    float degToRad = 0.01745329251f; // 1/180
     [SerializeField] private float t = 0.5f;
     [SerializeField] private float z, theta;
     [SerializeField] private float[] rlamda_R = { 1f, 1f, 0.1f, 0.01f }; //Reziprok der Eigenwerte von R (Aussage, welche Elemente des Statevectors wichtiger sind
-    [SerializeField] private float p = 1; //Aussage, wie agressiv gesteuert werden darf
+    [SerializeField] private float p = 0.001f; //Aussage, wie agressiv gesteuert werden darf
     [SerializeField] private float[] B; //Wie geht unser controller in den statevector ein
     [SerializeField] private Rigidbody rbStift; //rb des Stifts (wird für x[] nicht verwendet, weil es irl auch nicht so wäre
     [SerializeField] private Rigidbody rbCube;
@@ -23,7 +23,7 @@ public class JankLQR2D : MonoBehaviour
         k = new float[4];
         x = new float[4];
         Debug.Log(B[3]);
-        x[2] = rbStift.rotation.eulerAngles.z*R2PI;
+        x[2] = rbStift.rotation.eulerAngles.z*degToRad;
         x[0] = rbCube.position.x;
     }
     private float[] naivCrossProduct(float[] v1, float[] v2)
@@ -53,14 +53,15 @@ public class JankLQR2D : MonoBehaviour
         }
         else
         {
-            k = naivCrossProduct(rlamda_R, B);
+            /*k = naivCrossProduct(rlamda_R, B);
             setX();
             a = -dotProduct(k, x);
-            publish(a);
+            publish(a);*/
+            publish(1);
         }
     }
 
-    private void publish(float a)
+    public void publish(float a)
     {
         rbCube.velocity += new Vector3(a*Time.deltaTime, 0, 0);
     }
@@ -68,8 +69,8 @@ public class JankLQR2D : MonoBehaviour
     private void setX()
     {
 
-        x[3] = rbStift.angularVelocity.z * R2PI;
-        x[2] = rbStift.rotation.eulerAngles.z * R2PI;
+        x[3] = -rbStift.angularVelocity.z * degToRad;
+        x[2] = -rbStift.rotation.eulerAngles.z * degToRad;
         x[1] = (z - rbCube.position.x) / Time.deltaTime;
         x[0] = rbCube.position.x;
         /*x[3] = (theta - rbStift.rotation.eulerAngles.z)*R2PI / Time.deltaTime;
